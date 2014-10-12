@@ -186,4 +186,188 @@ SWAP
 	如果超过了这个期限，soft限制会代替hard限制。
 	
 		
+
 		
+bash:bourne again shell(/bin/bash)
+	history:上下箭头，保存在：ls ~/.bash_history 目录中
+	Tab键：命令补齐
+	设置别名：ll == ls -l
+	
+
+	
+SHELL的变量
+	1 变量和变量的内容用=连接文件 a=4
+	2 =两边不能有空格
+	3 只能以字母开头
+	4 b="lang  sin"   b='langsin'
+	
+	获取变量值：$+变量名称
+	echo：打印变量值 echo $a
+	c="lang$a    sin" :echo c结果为：lang4    sin
+	c='lang$a    sin' :echo c结果为：lang$a    sin
+	
+	如何定义一个全局变量(所有终端下)：export a或者放到.bashrc中
+	
+	查看系统环境变量：env
+	
+	查看自己定义过的变量和环境变量：set
+	删除变量:uset a
+	
+	PS1='[\u@\h \W]\$ '
+	
+	\d日期
+	\H完整主机名
+	\h完整主机名小数点之前的名字
+	\t显示时间24小时格式的
+	\T显示时间12小时格式的
+	\u目前登录账户的名字
+	\v当前bash的版本信息
+	\w完整的目录名字
+	\W使用basename函数取得的目录的名字
+	
+	
+	键盘IO：read
+	read a
+	read -p "please input your username:" username
+	
+	
+	
+	数组：
+	定义：array[0]=1 array[1]=aaa
+	echo "${array[1]}"
+	
+	
+	history -w相当于flush功能，直接写入文件
+	!+历史（history）编号：动态执行制定命令
+	!!:上次执行的命令
+	!re:执行上次以re开头的命令
+	
+	
+	wildcard：通配符
+	* 代表0到多个
+	? 代表有且只有一个
+	+ 1个到多个
+	[] [1,a,4,d]代表至少要有中括号中的一个
+	[0-9]代表0-9
+	[^]取反 [^xyz]除了x，y，z
+	
+	
+	
+	特殊符号：
+	#：代表注释
+	\：代表转义
+	;：连续执行命令 ls;ls
+	`：作为先执行的命令  cd /lib/modules/`uname -r`/kernel
+	!：非
+	()：
+	{}：
+	> >> < <<：数据流重定向
+	
+	
+	
+	数据流重定向：
+	>：覆盖重定向
+	ls > 1.txt,echo 1 >1.txt
+	!&:前边一个命令的最后一组输入
+	>>:追加模式重定向 echo 1 >>1.txt
+	
+	标准输入：stdin       0(代码号)
+	标准输出：stdout      1(代码号) 
+	标准错误输出：stderr  2(代码号)
+	
+	1>,1>> 标准输出
+	2>,2>> 标准错误输出
+	find：find .(当前目录) -name 1.txt 
+		  find /data -name 1.txt
+	分类输出：find /home/ -name .bash_profile 1>1.txt 2>2.txr
+	不分类：find /home/ -name .bash_profile >log 2>&1或者find /home/ -name .bash_profile &>log
+	find /home/ -name .bash_profile 1>1.txt 2>/dev/null(丢弃)
+	
+	
+	输入：<  <<
+	cat >2<<end
+	cat >1.txt </etc/passwd
+	
+	
+	查看命令回传码：echo $?
+	
+	命令的连续执行：
+	;  ：ls -x;ls 第一个执行失败第二个照样执行
+	&& ：c1&&c2 c1命令回传码 =0则c2执行，否则不执行
+	|| ：如果说c1命令回传码=0则第二个不执行，只有当第一个回传码不是0，c2才执行
+	
+	
+	管道：pipe
+	c1|c2：管道前的命令的输出作为输入参数
+	
+	find：查找命令
+		-name 指定文件名
+		-size 指定大小
+		-type 指定类型    f文件（find -type f）    d目录（find -type d）
+		-o 或
+		-a 与
+		-not 非
+		-user 指定用户
+		-group 指定用户组
+		-perm 根据权限位来搜索
+		例子：1.查询文件大小=5M的（find . -type f -size 5M）
+				            >（find . -type f -size +5M）
+							<（find . -type f -size -5M）
+			  2.大于2M且小于6M的 find . -type f -size +2M -a -6M
+			  3.大于2M或者小于6M的 find . -type f -size +2M -o -6M -user root -perm 644
+			  
+			  
+	cut:类似于java中的StringTokenizer
+	
+		cut -d(分隔符) -f(第几个，从1开始) 1 文件
+			 cut -d : -f 1 /etc/passwd
+			 cut -d : -f 1,3 /etc/passwd
+			 
+		echo $PATH | cut -d: -f 3
+		
+	sort：排序命令
+			cat /etc/passwd | sort
+			cat /etc/passwd | sort -t(分隔符) ':' -k(分隔符后第几个) 5
+	
+	wc：统计行数、字数、多少个字符
+		cat /etc/passwd | wc  
+		输出结果如下：44(行数) 66(字数) 1878(字符数)
+	
+	uniq：消除重复行
+		cat 1.txt | uniq
+		
+	
+	xargs：管道前的命令的输出结果作为管道后的命令输入参数，是一个循环的过程
+		
+		
+	练习1：为当前linux的所有主机用户创建目录，目录的名字要和用户的名字一直
+		cut -d : -f 1 | xargs mkdir 
+	练习2：查找当前目录下大于5M，小于10M的文件，将其拷贝到指定目录
+		find . -type f -size +5M -a -size -10M | xargs -i cp {} /root/xargs
+		如果xargs后面不接任何参数 默认代表echo输出
+		
+	批量添加用户避免两次输入密码：echo 123 | passwd --stdin abc
+	
+	
+	grep:筛选内容
+		查找demo.txt中包含good的一行：grep good demo.txt
+		-i 忽略大小写
+		-n 输出行号
+		-v 反向选择（grep good demo.txt -v：不包含good的一行）
+		-r 在文件夹下搜索（grep -r 'root' /etc:搜索的是/etc这个文件夹下的文件中包含root的文件）
+		
+		
+		
+		
+	正则表达式：
+		基础正则：1.'.':代表一个字符  2.'*' 3. '^' ：以...开头4. '$'：以...结尾 5. '[]' 6. '\'：转义
+		
+		扩展正则：1.{n}只能出现n次 2.{n,m}出现n到m之间次 3.{n,}n次到多次 4.{}只能出现的范围 5.+:一个或者一个以上 6.?：0个或者1个
+				  7.|:或者 8.()：一种组，egrep 'v(aa|oo)v' demo.txt
+		要想使用扩展正则，三个方案：
+			1. 用转义字符\
+			2. 使用-E参数
+			3. 使用egrep
+	
+	sed 与 awk：
+		sed[option] 'cmd' [file]
